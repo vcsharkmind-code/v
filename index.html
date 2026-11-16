@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Jardín Secreto de Valy ✨</title>
+    <style>
+        /* =========================================================================
+           1. VARIABLES DE DISEÑO Y ESTILOS BASE (ESTÉTICA NOCTURNA DE CUENTO)
+           ========================================================================= */
+        :root {
+            --sky-top: #070412;
+            --sky-mid: #130B2E;
+            --sky-horizon: #261447;
+            --gold-primary: #FBBF24;
+            --gold-bright: #FEF08A;
+            --lily-pink: #F472B6;
+            --lily-violet: #C084FC;
+            --lily-cyan: #38BDF8;
+            --glass-bg: rgba(16, 11, 36, 0.76);
+            --glass-border: rgba(251, 191, 36, 0.36);
+            --text-main: #FFFBEB;
+            --text-soft: #E9D5FF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background: var(--sky-top);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+            touch-action: none;
+        }
+
+        /* =========================================================================
+           2. LIENZO PRINCIPAL Y CAPAS DE INTERFAZ
+           ========================================================================= */
+        #garden-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 1;
+            cursor: crosshair;
+        }
+
+        .hud-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .hud-layer {
+                padding: 1.15rem 1.5rem;
+            }
+        }
+
+        /* =========================================================================
+           3. BARRA SUPERIOR (PROGRESO DE LOS 7 LIRIOS, ESENCIA Y AUDIO)
+           ========================================================================= */
+        .top-hud {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .glass-pill {
+            pointer-events: auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-border);
+            border-radius: 999px;
+            padding: 0.45rem 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+        }
+
+        .lily-tracker {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lily-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid rgba(254, 240, 138, 0.35);
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            opacity: 0.45;
+            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .lily-badge.bloomed {
+            opacity: 1;
+            transform: scale(1.15);
+            border-color: var(--gold-bright);
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.45), rgba(244, 114, 182, 0.3));
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+        }
+
+        .essence-counter {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold-bright);
+            letter-spacing: 0.03em;
+        }
+
+        .bond-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .bond-bar-track {
+            width: 54px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            overflow: hidden;
+            border: 1px solid rgba(244, 114, 182, 0.45);
+        }
+
+        .bond-bar-fill {
+            height: 100%;
+            width: 20%;
+            background: linear-gradient(90deg, #F472B6, #FEF08A);
+            border-radius: 999px;
+            transition: width 0.35s ease;
+        }
+
+        .audio-btn {
+            cursor: pointer;
+            color: var(--gold-bright);
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+
+        .audio-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Banner de guía dinámica */
+        .guide-banner {
+            align-self: center;
+            margin-top: 0.4rem;
+            background: linear-gradient(90deg, rgba(16, 11, 36, 0.2), rgba(28, 17, 58, 0.85), rgba(16, 11, 36, 0.2));
+            border-top: 1px solid rgba(251, 191, 36, 0.28);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.28);
+            padding: 0.45rem 1.35rem;
+            border-radius: 999px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-soft);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+            max-width: 92vw;
+            transition: opacity 0.3s ease;
+        }
+
+        .guide-banner strong {
+            color: var(--gold-bright);
+        }
+
+        /* =========================================================================
+           4. PANEL INFERIOR DE HERRAMIENTAS Y ACCIÓN ENTRE PERSONAJES
+           ========================================================================= */
+        .bottom-dock {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.55rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .dock-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .pair-interact-btn {
+            pointer-events: auto;
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.28), rgba(192, 132, 252, 0.32));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(254, 240, 138, 0.55);
+            color: #FFFBEB;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.52rem 0.92rem;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            box-shadow: 0 8px 20px rgba(244, 114, 182, 0.24);
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pair-interact-btn.active-state,
+        .pair-interact-btn:hover {
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+            border-color: #FEF08A;
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .pair-interact-btn:active {
+            transform: scale(0.94);
+        }
+
+        .move-pad {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .move-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(16, 11, 36, 0.82);
+            border: 1px solid rgba(254, 240, 138, 0.45);
+            color: #FEF08A;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.12s ease, background 0.2s ease;
+        }
+
+        .move-btn:active {
+            transform: scale(0.88);
+            background: rgba(251, 191, 36, 0.28);
+        }
+
+        .pair-interact-btn {
+            pointer-events: auto;
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.32), rgba(192, 132, 252, 0.34));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(254, 240, 138, 0.65);
+            color: #FFFBEB;
+            font-size: 0.84rem;
+            font-weight: 700;
+            padding: 0.62rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: 0 8px 24px rgba(244, 114, 182, 0.28);
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pair-interact-btn.near {
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+            box-shadow: 0 0 24px rgba(244, 114, 182, 0.65);
+            transform: scale(1.04);
+        }
+
+        .pair-interact-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tools-bar {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(14, 9, 32, 0.84);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            padding: 0.45rem;
+            border-radius: 1.35rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65);
+        }
+
+        .tool-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid transparent;
+            border-radius: 1rem;
+            padding: 0.5rem 0.78rem;
+            color: var(--text-soft);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.18rem;
+            min-width: 78px;
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (min-width: 640px) {
+            .tool-btn {
+                min-width: 104px;
+                padding: 0.6rem 1.05rem;
+            }
+        }
+
+        .tool-btn:hover {
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(160deg, rgba(251, 191, 36, 0.25), rgba(192, 132, 252, 0.22));
+            border-color: var(--gold-bright);
+            color: #FFFFFF;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.28);
+        }
+
+        .tool-icon {
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        .tool-name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        /* Botón de acción épica (Unir Magia de los Lirios) */
+        .epic-action-btn {
+            pointer-events: auto;
+            display: none;
+            background: linear-gradient(135deg, #D97706 0%, #DB2777 50%, #7C3AED 100%);
+            border: 1.5px solid #FEF08A;
+            color: #FFFBEB;
+            font-size: 0.96rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.85rem 1.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 0 28px rgba(251, 191, 36, 0.65), 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        .epic-action-btn.visible {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 22px rgba(251, 191, 36, 0.55); }
+            50% { transform: scale(1.05); box-shadow: 0 0 38px rgba(254, 240, 138, 0.9); }
+        }
+
+        /* =========================================================================
+           5. PANTALLA DE BIENVENIDA Y PERGAMINO DE REVELACIÓN FINAL
+           ========================================================================= */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            background: radial-gradient(circle at center, rgba(19, 11, 46, 0.68) 0%, rgba(5, 3, 14, 0.9) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: opacity 0.55s ease, visibility 0.55s ease;
+        }
+
+        .modal-backdrop.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .parchment-card {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(160deg, rgba(28, 17, 58, 0.92) 0%, rgba(12, 7, 28, 0.96) 100%);
+            border: 1.5px solid rgba(254, 240, 138, 0.55);
+            border-radius: 1.75rem;
+            padding: 1.85rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(192, 132, 252, 0.25), 0 25px 70px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(251, 191, 36, 0.12);
+            position: relative;
+            animation: cardFloatIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @media (min-width: 640px) {
+            .parchment-card {
+                padding: 2.35rem 2.15rem;
+            }
+        }
+
+        @keyframes cardFloatIn {
+            0% { opacity: 0; transform: translateY(24px) scale(0.94); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-eyebrow {
+            display: inline-block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--gold-bright);
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            padding: 0.3rem 0.95rem;
+            border-radius: 999px;
+            margin-bottom: 0.9rem;
+        }
+
+        .card-title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.85rem;
+            line-height: 1.22;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFBEB 15%, #FEF08A 55%, #F472B6 95%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.85rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-title {
+                font-size: 2.25rem;
+            }
+        }
+
+        .card-body {
+            font-size: 0.95rem;
+            line-height: 1.68;
+            color: #F3E8FF;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-medallion {
+            margin: 1.1rem 0 1.25rem;
+            padding: 0.95rem;
+            border-radius: 1.1rem;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.16), rgba(219, 39, 119, 0.16));
+            border: 1px solid rgba(254, 240, 138, 0.6);
+            box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.18);
+        }
+
+        .date-medallion-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.22em;
+            color: #FBCFE8;
+            margin-bottom: 0.2rem;
+            font-weight: 600;
+        }
+
+        .date-medallion-value {
+            font-family: Georgia, serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #FEF08A;
+            text-shadow: 0 0 24px rgba(251, 191, 36, 0.75);
+        }
+
+        .date-medallion-sub {
+            font-size: 0.92rem;
+            font-style: italic;
+            color: #FDE68A;
+            margin-top: 0.25rem;
+        }
+
+        @media (min-width: 640px) {
+            .date-medallion-value {
+                font-size: 2.65rem;
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #F59E0B 0%, #DB2777 55%, #7C3AED 100%);
+            border: 1px solid #FEF08A;
+            color: #FFFBEB;
+            font-size: 0.96rem;
+            font-weight: 700;
+            padding: 0.9rem 1.85rem;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 28px rgba(219, 39, 119, 0.4);
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            filter: brightness(1.08);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(254, 240, 138, 0.35);
+            color: #FEF08A;
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding: 0.82rem 1.35rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(251, 191, 36, 0.16);
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            justify-content: center;
+        }
+
+        @media (min-width: 480px) {
+            .modal-actions {
+                flex-direction: row;
+            }
+        }
+
+        /* Etiquetas flotantes en el DOM para frases poéticas */
+        .poetic-toast {
+            position: fixed;
+            z-index: 20;
+            pointer-events: none;
+            background: rgba(18, 11, 40, 0.88);
+            border: 1px solid rgba(254, 240, 138, 0.55);
+            color: #FEF08A;
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65), 0 0 15px rgba(251, 191, 36, 0.3);
+            transform: translate(-50%, -50%);
+            animation: toastRise 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            white-space: nowrap;
+            max-width: 90vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes toastRise {
+            0% { opacity: 0; transform: translate(-50%, -20%) scale(0.88); }
+            15% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -95%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -125%) scale(0.95); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lienzo principal interactivo -->
+    <canvas id="garden-canvas"></canvas>
+
+    <!-- Capa HUD de controles y progreso -->
+    <div class="hud-layer">
+        <div>
+            <div class="top-hud">
+                <!-- Progreso de los 7 Lirios -->
+                <div class="glass-pill" title="Lirios florecidos en el jardín">
+                    <span style="font-size: 0.74rem; font-weight: 700; color: #FEF08A; letter-spacing: 0.05em;">LIRIOS</span>
+                    <div class="lily-tracker" id="lily-tracker">
+                        <span class="lily-badge" data-idx="0">🌷</span>
+                        <span class="lily-badge" data-idx="1">🌷</span>
+                        <span class="lily-badge" data-idx="2">🌷</span>
+                        <span class="lily-badge" data-idx="3">🌷</span>
+                        <span class="lily-badge" data-idx="4">🌷</span>
+                        <span class="lily-badge" data-idx="5">🌷</span>
+                        <span class="lily-badge" data-idx="6">🌷</span>
+                    </div>
+                </div>
+
+                <!-- Contador de Sintonía, Esencia Mágica y Botón de Audio -->
+                <div style="display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap;">
+                    <div class="glass-pill bond-pill" title="Sintonía entre Valy y tú">
+                        <span>💫</span>
+                        <div class="bond-bar-track">
+                            <div class="bond-bar-fill" id="bond-bar-fill"></div>
+                        </div>
+                        <span class="essence-counter" id="essence-count">0 ✨</span>
+                    </div>
+                    <button class="glass-pill audio-btn" id="btn-audio" aria-label="Activar o silenciar música">
+                        <span id="audio-icon">🔊</span>
+                        <span id="audio-label">Música</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Banner dinámico de instrucciones -->
+            <div class="guide-banner" id="guide-banner">
+                Toca el jardín para caminar con <strong>Valy</strong>, cultiva los 7 lirios detrás e interactúa con él ✨
+            </div>
+        </div>
+
+        <!-- Barra inferior de herramientas y botón de interacción entre los dos -->
+        <div class="bottom-dock">
+            <div class="dock-actions-row">
+                <div class="move-pad" aria-label="Mover a Valy">
+                    <button id="btn-move-left" class="move-btn" title="Caminar a la izquierda">◀</button>
+                    <button id="btn-move-right" class="move-btn" title="Caminar a la derecha">▶</button>
+                </div>
+
+                <button id="btn-pair-talk" class="pair-interact-btn">
+                    <span>💬</span>
+                    <span>Hablar ✨</span>
+                </button>
+
+                <button id="btn-pair-hand" class="pair-interact-btn">
+                    <span id="hand-btn-icon">🤝</span>
+                    <span id="hand-btn-text">Tomar su mano</span>
+                </button>
+
+                <button id="btn-pair-gift" class="pair-interact-btn">
+                    <span>🌸</span>
+                    <span>Regalar destello</span>
+                </button>
+
+                <button id="btn-unite-lilies" class="epic-action-btn">
+                    <span>✨ Reunirse bajo el Arco de Lirios ✨</span>
+                </button>
+            </div>
+
+            <div class="tools-bar" id="tools-bar">
+                <button class="tool-btn active" data-tool="seed" id="tool-seed">
+                    <span class="tool-icon">🌱</span>
+                    <span class="tool-name">1. Semillas</span>
+                </button>
+                <button class="tool-btn" data-tool="water" id="tool-water">
+                    <span class="tool-icon">💧</span>
+                    <span class="tool-name">2. Rocío Lunar</span>
+                </button>
+                <button class="tool-btn" data-tool="stardust" id="tool-stardust">
+                    <span class="tool-icon">✨</span>
+                    <span class="tool-name">3. Polvo Estelar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1: Pantalla de Bienvenida -->
+    <div class="modal-backdrop" id="intro-modal">
+        <div class="parchment-card">
+            <div style="font-size: 3rem; margin-bottom: 0.45rem;">🌙🌷✨</div>
+            <span class="card-eyebrow">Jardín Nocturno Confidencial</span>
+            <h1 class="card-title">El Jardín Secreto de Valy ✨</h1>
+            <p class="card-body">
+                Bajo esta noche estrellada, tú y él caminan juntos frente a siete lirios encantados que esperan florecer.
+                Muévete por el prado (tocando el suelo o con flechas/WASD), cultiven los lirios detrás de ustedes y compartan momentos mágicos para descubrir qué guarda este día.
+            </p>
+            <button class="btn-primary" id="btn-begin-garden">
+                <span>Entrar al Jardín Juntos</span>
+                <span>🗝️</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Gran Revelación Misteriosa Final -->
+    <div class="modal-backdrop hidden" id="reveal-modal">
+        <div class="parchment-card">
+            <div style="font-size: 2.5rem; margin-bottom: 0.35rem;">🌷✨🕯️✨🌷</div>
+            <span class="card-eyebrow">El Misterio Revelado</span>
+            <h2 class="card-title">Para ti, Valy ✨</h2>
+            
+            <div class="date-medallion">
+                <div class="date-medallion-label">Hoy día</div>
+                <div class="date-medallion-value">16 / 11 / 2026</div>
+                <div class="date-medallion-sub">será una fecha importante...</div>
+            </div>
+
+            <p class="card-body" style="margin-bottom: 1.4rem;">
+                “Hay cosas que no se explican con palabras, solo se sienten cuando llega el momento indicado.
+                Guarda bien este instante entre los lirios... Prepárate para hoy, <strong>Valy ✨</strong>”
+            </p>
+
+            <div class="modal-actions">
+                <button class="btn-primary" id="btn-sandbox">
+                    <span>Seguir explorando el jardín</span>
+                    <span>🌸</span>
+                </button>
+                <button class="btn-ghost" id="btn-restart">
+                    Volver a vivir la magia ↺
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * =========================================================================
+         * MÓDULO 1: MOTOR DE AUDIO ENCANTADO (WEB AUDIO API - CAJA DE MÚSICA)
+         * =========================================================================
+         */
+        class EnchantedSoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+                this.ambientStarted = false;
+                this.ambientTimer = null;
+            }
+
+            init() {
+                try {
+                    if (!this.ctx) {
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        if (AudioCtx) this.ctx = new AudioCtx();
+                    }
+                    if (this.ctx && this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    if (this.ctx && !this.ambientStarted) {
+                        this.startMusicBoxLoop();
+                    }
+                } catch (e) {}
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+                return this.muted;
+            }
+
+            playChime(freq, type = 'sine', duration = 0.6, volume = 0.1, delay = 0) {
+                if (this.muted) return;
+                try {
+                    if (!this.ctx) this.init();
+                    if (!this.ctx) return;
+                    const now = this.ctx.currentTime + delay;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + duration + 0.05);
+                } catch (e) {}
+            }
+
+            startMusicBoxLoop() {
+                this.ambientStarted = true;
+                const melody = [
+                    [329.63, 493.88, 659.25], // Em
+                    [261.63, 392.00, 523.25], // C
+                    [392.00, 587.33, 783.99], // G
+                    [293.66, 440.00, 587.33]  // D
+                ];
+                let idx = 0;
+                const tick = () => {
+                    if (!this.muted && this.ctx && this.ctx.state === 'running') {
+                        const notes = melody[idx % melody.length];
+                        notes.forEach((f, i) => {
+                            this.playChime(f, 'sine', 2.4, 0.024, i * 0.45);
+                        });
+                        idx++;
+                    }
+                    this.ambientTimer = setTimeout(tick, 3200);
+                };
+                tick();
+            }
+
+            playPlantSeed() {
+                this.playChime(440, 'sine', 0.35, 0.1, 0);
+                this.playChime(659.25, 'triangle', 0.4, 0.07, 0.07);
+            }
+
+            playWaterDrop() {
+                this.playChime(587.33 + Math.random() * 140, 'sine', 0.25, 0.05, 0);
+            }
+
+            playStardust() {
+                this.playChime(880 + Math.random() * 320, 'sine', 0.3, 0.05, 0);
+            }
+
+            playCollectLight() {
+                this.playChime(659.25, 'sine', 0.45, 0.11, 0);
+                this.playChime(987.77, 'sine', 0.55, 0.09, 0.08);
+            }
+
+            playShadowBanish() {
+                this.playChime(523.25, 'triangle', 0.35, 0.1, 0);
+                this.playChime(783.99, 'sine', 0.45, 0.09, 0.07);
+            }
+
+            playLilyBloom(lilyIdx = 0) {
+                const base = [523.25, 587.33, 659.25, 783.99, 880.00, 987.77, 1046.50][lilyIdx % 7];
+                this.playChime(base, 'sine', 0.7, 0.12, 0);
+                this.playChime(base * 1.25, 'sine', 0.8, 0.09, 0.09);
+                this.playChime(base * 1.5, 'triangle', 0.9, 0.07, 0.18);
+            }
+
+            playSealTap(step) {
+                const f = 440 + step * 140;
+                this.playChime(f, 'sine', 0.65, 0.13, 0);
+                this.playChime(f * 1.5, 'triangle', 0.7, 0.08, 0.06);
+            }
+
+            playGrandFinale() {
+                const chord = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51];
+                chord.forEach((f, i) => {
+                    this.playChime(f, 'sine', 1.5, 0.12, i * 0.14);
+                    this.playChime(f * 0.5, 'triangle', 1.6, 0.06, i * 0.14);
+                });
+            }
+        }
+
+        /**
+         * =========================================================================
+         * MÓDULO 2: PERSONAJES INTERACTIVOS DE CUENTO (VALY CON CABELLO ONDULADO Y ÉL)
+         * =========================================================================
+         */
+        class GardenCharacter {
+            constructor(role, name, x, y) {
+                this.role = role; // 'valy' | 'boy'
+                this.name = name;
+                this.x = x;
+                this.y = y;
+                this.targetX = x;
+                this.targetY = y;
+                this.facing = role === 'valy' ? -1 : 1;
+                this.walkCycle = 0;
+                this.isMoving = false;
+                this.breathPhase = Math.random() * Math.PI * 2;
+                this.blinkTimer = 80 + Math.floor(Math.random() * 120);
+                this.isBlinking = false;
+                this.emote = null;       // 'heart' | 'sparkle' | 'lily'
+                this.emoteTimer = 0;
+                this.speechText = '';
+                this.speechTimer = 0;
+                this.holdingHands = false;
+                this.celebrateTimer = 0;
+            }
+
+            say(text, duration = 260) {
+                this.speechText = text;
+                this.speechTimer = duration;
+            }
+
+            triggerEmote(type, duration = 120) {
+                this.emote = type;
+                this.emoteTimer = duration;
+            }
+
+            update(bounds, keys, partner) {
+                this.breathPhase += 0.045;
+
+                // Parpadeo natural expresivo
+                this.blinkTimer--;
+                if (this.blinkTimer <= 0) {
+                    this.isBlinking = !this.isBlinking;
+                    this.blinkTimer = this.isBlinking ? 8 : (110 + Math.floor(Math.random() * 140));
+                }
+
+                if (this.emoteTimer > 0) this.emoteTimer--;
+                else this.emote = null;
+
+                if (this.speechTimer > 0) this.speechTimer--;
+                else this.speechText = '';
+
+                if (this.celebrateTimer > 0) this.celebrateTimer--;
+
+                if (this.role === 'valy') {
+                    // Movimiento directo por teclado WASD / Flechas o botones virtuales
+                    let vx = 0;
+                    let vy = 0;
+                    if (keys['ArrowLeft'] || keys['a'] || keys['A']) vx -= 1;
+                    if (keys['ArrowRight'] || keys['d'] || keys['D']) vx += 1;
+                    if (keys['ArrowUp'] || keys['w'] || keys['W']) vy -= 1;
+                    if (keys['ArrowDown'] || keys['s'] || keys['S']) vy += 1;
+
+                    if (vx !== 0 || vy !== 0) {
+                        const len = Math.hypot(vx, vy);
+                        const speed = 3.6;
+                        this.x += (vx / len) * speed;
+                        this.y += (vy / len) * speed * 0.75;
+                        this.targetX = this.x;
+                        this.targetY = this.y;
+                        if (vx !== 0) this.facing = vx > 0 ? 1 : -1;
+                        this.isMoving = true;
+                        this.walkCycle += 0.22;
+                    } else {
+                        // Movimiento suave hacia punto tocado en el prado
+                        const dx = this.targetX - this.x;
+                        const dy = this.targetY - this.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist > 4) {
+                            const speed = Math.min(3.8, dist * 0.12 + 1.2);
+                            this.x += (dx / dist) * speed;
+                            this.y += (dy / dist) * speed;
+                            if (Math.abs(dx) > 1.5) this.facing = dx > 0 ? 1 : -1;
+                            this.isMoving = true;
+                            this.walkCycle += 0.2;
+                        } else {
+                            this.isMoving = false;
+                            this.walkCycle = 0;
+                            if (partner) this.facing = partner.x >= this.x ? 1 : -1;
+                        }
+                    }
+                } else {
+                    // IA tierna de ÉL: camina al lado de Valy
+                    const sideSign = partner.x >= this.x ? -1 : 1;
+                    const idealOffsetX = this.holdingHands ? -38 : sideSign * 54;
+                    const idealOffsetY = this.holdingHands ? 2 : 5;
+                    const destX = partner.x + idealOffsetX;
+                    const destY = partner.y + idealOffsetY;
+
+                    const dx = destX - this.x;
+                    const dy = destY - this.y;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist > 6) {
+                        const speed = this.holdingHands ? Math.min(4.2, dist * 0.22) : Math.min(3.3, dist * 0.085 + 0.85);
+                        this.x += (dx / dist) * speed;
+                        this.y += (dy / dist) * speed;
+                        if (Math.abs(dx) > 1) this.facing = dx > 0 ? 1 : -1;
+                        this.isMoving = true;
+                        this.walkCycle += 0.19;
+                    } else {
+                        this.isMoving = false;
+                        this.walkCycle = 0;
+                        this.facing = partner.x >= this.x ? 1 : -1;
+                    }
+                }
+
+                // Limitar dentro del sendero luminoso delante de los lirios
+                this.x = Math.max(36, Math.min(bounds.w - 36, this.x));
+                this.y = Math.max(bounds.minY, Math.min(bounds.maxY, this.y));
+            }
+
+            draw(ctx, time, partner) {
+                const scale = W < 500 ? 0.85 : 1.02;
+                const bob = this.isMoving
+                    ? Math.abs(Math.sin(this.walkCycle)) * 4.5
+                    : Math.sin(this.breathPhase) * 1.6;
+                const jump = this.celebrateTimer > 0 ? Math.abs(Math.sin(this.celebrateTimer * 0.25)) * 12 : 0;
+
+                ctx.save();
+                ctx.translate(this.x, this.y - bob - jump);
+                ctx.scale(scale, scale);
+
+                // Sombra suave en el sendero nocturno
+                ctx.save();
+                ctx.translate(0, bob + jump);
+                ctx.fillStyle = 'rgba(4, 2, 12, 0.55)';
+                ctx.beginPath();
+                ctx.ellipse(0, 2, 22, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // Aura cálida sutil alrededor de cada personaje
+                const aura = ctx.createRadialGradient(0, -38, 4, 0, -38, 52);
+                aura.addColorStop(0, this.role === 'valy' ? 'rgba(244, 114, 182, 0.2)' : 'rgba(125, 211, 252, 0.18)');
+                aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = aura;
+                ctx.beginPath();
+                ctx.arc(0, -38, 52, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (this.role === 'valy') {
+                    this.drawValy(ctx, time);
+                } else {
+                    this.drawBoy(ctx, time);
+                }
+
+                ctx.restore();
+
+                // Si están tomados de la mano, dibujar vínculo de luz dorada entre ambos
+                if (this.role === 'valy' && this.holdingHands && partner) {
+                    const hand1X = this.x - 14 * scale;
+                    const hand1Y = this.y - 26 * scale - bob;
+                    const hand2X = partner.x + 14 * scale;
+                    const hand2Y = partner.y - 26 * scale;
+
+                    ctx.save();
+                    ctx.strokeStyle = '#FEF08A';
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#F472B6';
+                    ctx.beginPath();
+                    ctx.moveTo(hand1X, hand1Y);
+                    ctx.quadraticCurveTo((hand1X + hand2X) / 2, Math.max(hand1Y, hand2Y) + 6, hand2X, hand2Y);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#FFFBEB';
+                    ctx.beginPath();
+                    ctx.arc((hand1X + hand2X) / 2, (hand1Y + hand2Y) / 2 + 2, 4 + Math.sin(time * 0.01) * 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                this.drawBubbleAndLabel(ctx, scale, bob + jump);
+            }
+
+            drawValy(ctx, time) {
+                const breeze = Math.sin(time * 0.003 + this.breathPhase) * 4.8;
+                const legSwing = this.isMoving ? Math.sin(this.walkCycle) * 5 : 0;
+
+                // 1. Manto trasero de CABELLO LARGO Y ONDULADO
+                ctx.save();
+                const hairGrad = ctx.createLinearGradient(0, -76, 0, -2);
+                hairGrad.addColorStop(0, '#2A140E');
+                hairGrad.addColorStop(0.55, '#4A2518');
+                hairGrad.addColorStop(1, '#6B3826');
+                ctx.fillStyle = hairGrad;
+
+                ctx.beginPath();
+                ctx.moveTo(-18, -66);
+                ctx.bezierCurveTo(-31, -54, -22 + breeze * 0.5, -42, -30 + breeze, -28);
+                ctx.bezierCurveTo(-35 + breeze, -16, -24 + breeze * 1.2, -8, -18 + breeze, -2);
+                ctx.quadraticCurveTo(0 + breeze * 0.8, 2, 18 + breeze, -2);
+                ctx.bezierCurveTo(24 + breeze * 1.2, -8, 35 + breeze, -16, 30 + breeze, -28);
+                ctx.bezierCurveTo(22 + breeze * 0.5, -42, 31, -54, 18, -66);
+                ctx.closePath();
+                ctx.fill();
+
+                // Ondas internas iluminadas por la luna en su cabello ondulado
+                ctx.strokeStyle = 'rgba(253, 230, 138, 0.26)';
+                ctx.lineWidth = 1.6;
+                for (let side of [-1, 1]) {
+                    ctx.beginPath();
+                    ctx.moveTo(side * 15, -56);
+                    ctx.bezierCurveTo(
+                        side * 25 + breeze * 0.4, -44,
+                        side * 17 + breeze * 0.8, -32,
+                        side * 25 + breeze, -12
+                    );
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                // 2. Zapatitos delicados
+                ctx.fillStyle = '#FBCFE8';
+                ctx.beginPath();
+                ctx.ellipse(-6 + legSwing * 0.4, -2, 5, 3, 0, 0, Math.PI * 2);
+                ctx.ellipse(6 - legSwing * 0.4, -2, 5, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 3. Vestido vaporoso tono lavanda y marfil con detalles dorados
+                const dressGrad = ctx.createLinearGradient(0, -44, 0, -5);
+                dressGrad.addColorStop(0, '#DDD6FE');
+                dressGrad.addColorStop(0.55, '#F3E8FF');
+                dressGrad.addColorStop(1, '#FCE7F3');
+                ctx.fillStyle = dressGrad;
+
+                ctx.beginPath();
+                ctx.moveTo(-9, -43);
+                ctx.lineTo(9, -43);
+                ctx.quadraticCurveTo(18, -24, 21 + breeze * 0.25, -7);
+                ctx.quadraticCurveTo(0, -3, -21 + breeze * 0.25, -7);
+                ctx.quadraticCurveTo(-18, -24, -9, -43);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#FBBF24';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(-9, -35);
+                ctx.quadraticCurveTo(0, -33, 9, -35);
+                ctx.stroke();
+
+                // 4. Bracitos tiernos
+                ctx.strokeStyle = '#FDE6D8';
+                ctx.lineWidth = 4.2;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-10, -40);
+                ctx.quadraticCurveTo(-16, -32, -14, -25);
+                ctx.moveTo(10, -40);
+                ctx.quadraticCurveTo(16, -32, 14, -25);
+                ctx.stroke();
+
+                // 5. Cabeza chibi expresiva
+                ctx.fillStyle = '#FDE6D8';
+                ctx.beginPath();
+                ctx.arc(0, -58, 17, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 6. Ojos grandes expresivos con parpadeo y mejillas sonrojadas
+                const lookX = this.facing * 2.2;
+                this.drawAnimeEyes(ctx, lookX, -57, '#3B1D14');
+
+                ctx.fillStyle = 'rgba(244, 114, 182, 0.44)';
+                ctx.beginPath();
+                ctx.ellipse(-9 + lookX * 0.6, -53, 3.6, 2.1, 0, 0, Math.PI * 2);
+                ctx.ellipse(9 + lookX * 0.6, -53, 3.6, 2.1, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#9F1239';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.arc(lookX * 0.7, -52.5, 2.8, 0.15 * Math.PI, 0.85 * Math.PI);
+                ctx.stroke();
+
+                // 7. Flequillo ondulado frontal y mechones laterales sobre los hombros
+                ctx.fillStyle = '#3B1D14';
+                ctx.beginPath();
+                ctx.arc(0, -61, 17.5, Math.PI * 1.02, Math.PI * 1.98);
+                ctx.quadraticCurveTo(10, -64, 3, -60);
+                ctx.quadraticCurveTo(-2, -65, -8, -59);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(-16, -63);
+                ctx.bezierCurveTo(-22, -52, -14 + breeze * 0.4, -40, -19 + breeze * 0.6, -24);
+                ctx.bezierCurveTo(-13 + breeze * 0.5, -34, -12, -48, -13, -58);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(16, -63);
+                ctx.bezierCurveTo(22, -52, 14 + breeze * 0.4, -40, 19 + breeze * 0.6, -24);
+                ctx.bezierCurveTo(13 + breeze * 0.5, -34, 12, -48, 13, -58);
+                ctx.closePath();
+                ctx.fill();
+
+                // 8. Broche luminoso de Lirio en su cabello
+                ctx.save();
+                ctx.translate(12, -71);
+                ctx.rotate(0.35);
+                ctx.fillStyle = '#F472B6';
+                ctx.shadowBlur = 9;
+                ctx.shadowColor = '#FEF08A';
+                for (let p = 0; p < 5; p++) {
+                    ctx.rotate((Math.PI * 2) / 5);
+                    ctx.beginPath();
+                    ctx.ellipse(0, -3.5, 1.8, 3.8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#FEF08A';
+                ctx.beginPath();
+                ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            drawBoy(ctx, time) {
+                const legSwing = this.isMoving ? Math.sin(this.walkCycle) * 5 : 0;
+                const scarfWave = Math.sin(time * 0.0035 + this.breathPhase) * 3.5;
+
+                // 1. Piernas y botines nocturnos
+                ctx.fillStyle = '#1E1B4B';
+                ctx.fillRect(-7 + legSwing * 0.35, -18, 5.5, 15);
+                ctx.fillRect(1.5 - legSwing * 0.35, -18, 5.5, 15);
+
+                ctx.fillStyle = '#0F172A';
+                ctx.beginPath();
+                ctx.ellipse(-4.5 + legSwing * 0.35, -2, 5.2, 3, 0, 0, Math.PI * 2);
+                ctx.ellipse(4.5 - legSwing * 0.35, -2, 5.2, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 2. Chaqueta azul medianoche elegante con detalles dorados
+                const coatGrad = ctx.createLinearGradient(0, -45, 0, -15);
+                coatGrad.addColorStop(0, '#1E3A8A');
+                coatGrad.addColorStop(1, '#172554');
+                ctx.fillStyle = coatGrad;
+
+                ctx.beginPath();
+                ctx.roundRect(-12, -44, 24, 28, 7);
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(0, -40);
+                ctx.lineTo(0, -17);
+                ctx.stroke();
+
+                // 3. Bracitos
+                ctx.strokeStyle = '#1E3A8A';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-12, -40);
+                ctx.lineTo(-15, -26);
+                ctx.moveTo(12, -40);
+                ctx.lineTo(15, -26);
+                ctx.stroke();
+
+                ctx.fillStyle = '#F7DEC8';
+                ctx.beginPath();
+                ctx.arc(-15, -25, 2.8, 0, Math.PI * 2);
+                ctx.arc(15, -25, 2.8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 4. Bufanda cálida
+                ctx.fillStyle = '#B45309';
+                ctx.beginPath();
+                ctx.roundRect(-11, -45, 22, 6.5, 3);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(4, -40);
+                ctx.quadraticCurveTo(9 + scarfWave, -32, 6 + scarfWave * 1.3, -24);
+                ctx.lineTo(11 + scarfWave * 1.3, -24);
+                ctx.quadraticCurveTo(13 + scarfWave, -32, 9, -40);
+                ctx.closePath();
+                ctx.fill();
+
+                // 5. Cabeza expresiva
+                ctx.fillStyle = '#F7DEC8';
+                ctx.beginPath();
+                ctx.arc(0, -60, 16.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 6. Ojos cálidos y sonrisa tierna
+                const lookX = this.facing * 2.2;
+                this.drawAnimeEyes(ctx, lookX, -59, '#1E1B4B');
+
+                ctx.fillStyle = 'rgba(244, 114, 182, 0.3)';
+                ctx.beginPath();
+                ctx.ellipse(-8.5 + lookX * 0.6, -55, 3.2, 1.8, 0, 0, Math.PI * 2);
+                ctx.ellipse(8.5 + lookX * 0.6, -55, 3.2, 1.8, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#7C2D12';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.arc(lookX * 0.7, -54.5, 3, 0.12 * Math.PI, 0.88 * Math.PI);
+                ctx.stroke();
+
+                // 7. Cabello castaño oscuro con mechones tiernos
+                ctx.fillStyle = '#271710';
+                ctx.beginPath();
+                ctx.arc(0, -63, 17.5, Math.PI * 0.96, Math.PI * 2.04);
+                ctx.lineTo(15, -67);
+                ctx.lineTo(9, -61);
+                ctx.lineTo(4, -67);
+                ctx.lineTo(-1, -60);
+                ctx.lineTo(-7, -66);
+                ctx.lineTo(-13, -61);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            drawAnimeEyes(ctx, lookX, eyeY, irisColor) {
+                for (let side of [-1, 1]) {
+                    const ex = side * 6.2 + lookX;
+                    if (this.isBlinking) {
+                        ctx.strokeStyle = irisColor;
+                        ctx.lineWidth = 1.6;
+                        ctx.beginPath();
+                        ctx.arc(ex, eyeY, 2.8, 0.1 * Math.PI, 0.9 * Math.PI);
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = irisColor;
+                        ctx.beginPath();
+                        ctx.ellipse(ex, eyeY, 2.7, 3.4, 0, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.beginPath();
+                        ctx.arc(ex - 0.8, eyeY - 1.2, 1.15, 0, Math.PI * 2);
+                        ctx.arc(ex + 0.9, eyeY + 0.9, 0.55, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            drawBubbleAndLabel(ctx, scale, verticalOffset) {
+                const topY = this.y - 86 * scale - verticalOffset;
+
+                ctx.save();
+                ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = this.role === 'valy' ? '#FBCFE8' : '#BAE6FD';
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = '#000000';
+                ctx.fillText(this.name, this.x, this.y + 16);
+                ctx.restore();
+
+                if (this.emote) {
+                    const floatUp = (120 - this.emoteTimer) * 0.14;
+                    ctx.save();
+                    ctx.font = '18px sans-serif';
+                    ctx.textAlign = 'center';
+                    const icon = this.emote === 'heart' ? '💖' : (this.emote === 'lily' ? '🌷' : '✨');
+                    ctx.fillText(icon, this.x, topY - 6 - floatUp);
+                    ctx.restore();
+                }
+
+                if (this.speechText) {
+                    ctx.save();
+                    ctx.font = '600 12px -apple-system, BlinkMacSystemFont, sans-serif';
+                    const paddingX = 12;
+                    const maxW = Math.min(230, W * 0.62);
+                    const words = this.speechText.split(' ');
+                    const lines = [];
+                    let line = '';
+
+                    for (let w of words) {
+                        const test = line ? `${line} ${w}` : w;
+                        if (ctx.measureText(test).width > maxW - paddingX * 2) {
+                            lines.push(line);
+                            line = w;
+                        } else {
+                            line = test;
+                        }
+                    }
+                    if (line) lines.push(line);
+
+                    const boxW = Math.min(maxW, Math.max(...lines.map(l => ctx.measureText(l).width)) + paddingX * 2);
+                    const lineH = 16;
+                    const boxH = lines.length * lineH + 14;
+                    const bx = Math.min(Math.max(this.x - boxW / 2, 10), W - boxW - 10);
+                    const by = Math.max(76, topY - boxH - 12);
+
+                    ctx.fillStyle = 'rgba(18, 11, 42, 0.92)';
+                    ctx.strokeStyle = this.role === 'valy' ? 'rgba(244, 114, 182, 0.75)' : 'rgba(254, 240, 138, 0.75)';
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 12);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    const pointerX = Math.min(Math.max(this.x, bx + 14), bx + boxW - 14);
+                    ctx.beginPath();
+                    ctx.moveTo(pointerX - 5, by + boxH);
+                    ctx.lineTo(pointerX, by + boxH + 6);
+                    ctx.lineTo(pointerX + 5, by + boxH);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#FFFBEB';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    lines.forEach((l, idx) => {
+                        ctx.fillText(l, bx + boxW / 2, by + 13 + idx * lineH);
+                    });
+                    ctx.restore();
+                }
+            }
+        }
+
+        const sound = new EnchantedSoundEngine();
+
+        /**
+         * =========================================================================
+         * MÓDULO 2: DEFINICIÓN BOTÁNICA Y POÉTICA DE LOS 7 LIRIOS MÁGICOS
+         * =========================================================================
+         */
+        const LILY_SPECIES = [
+            {
+                name: "Lirio de Cristal Lunar",
+                petalOuter: "#7DD3FC",
+                petalInner: "#E0F2FE",
+                veinColor: "#0284C7",
+                glowColor: "rgba(125, 211, 252, 0.65)",
+                stamenColor: "#FEF08A",
+                secretQuote: "1. Lirio de Cristal Lunar: «Cada pétalo guarda un secreto escrito para ti...»"
+            },
+            {
+                name: "Lirio Rosa Aurora",
+                petalOuter: "#F472B6",
+                petalInner: "#FCE7F3",
+                veinColor: "#DB2777",
+                glowColor: "rgba(244, 114, 182, 0.65)",
+                stamenColor: "#FDE047",
+                secretQuote: "2. Lirio Rosa Aurora: «Contigo, hasta los instantes más simples brillan distinto...»"
+            },
+            {
+                name: "Lirio Dorado del Alba",
+                petalOuter: "#FBBF24",
+                petalInner: "#FEF9C3",
+                veinColor: "#D97706",
+                glowColor: "rgba(251, 191, 36, 0.7)",
+                stamenColor: "#FFFBEB",
+                secretQuote: "3. Lirio Dorado del Alba: «Algo muy especial está a punto de comenzar hoy...»"
+            },
+            {
+                name: "Lirio Violeta Estelar",
+                petalOuter: "#C084FC",
+                petalInner: "#F3E8FF",
+                veinColor: "#7E22CE",
+                glowColor: "rgba(192, 132, 252, 0.65)",
+                stamenColor: "#FDE047",
+                secretQuote: "4. Lirio Violeta Estelar: «Las piezas del destino se están uniendo en silencio...»"
+            },
+            {
+                name: "Lirio Blanco Pureza",
+                petalOuter: "#E2E8F0",
+                petalInner: "#FFFFFF",
+                veinColor: "#94A3B8",
+                glowColor: "rgba(255, 255, 255, 0.75)",
+                stamenColor: "#FBBF24",
+                secretQuote: "5. Lirio Blanco Pureza: «Hoy no es un día cualquiera en el calendario, Valy...»"
+            },
+            {
+                name: "Lirio Coral Encantado",
+                petalOuter: "#FB7185",
+                petalInner: "#FFE4E6",
+                veinColor: "#E11D48",
+                glowColor: "rgba(251, 113, 133, 0.65)",
+                stamenColor: "#FEF08A",
+                secretQuote: "6. Lirio Coral Encantado: «Tu sonrisa es la llave de todo lo que viene...»"
+            },
+            {
+                name: "Lirio Azul Medianoche",
+                petalOuter: "#60A5FA",
+                petalInner: "#DBEAFE",
+                veinColor: "#1D4ED8",
+                glowColor: "rgba(96, 165, 250, 0.7)",
+                stamenColor: "#FDE047",
+                secretQuote: "7. Lirio Azul Medianoche: «El jardín está completo... El misterio espera ser abierto.»"
+            }
+        ];
+
+        /**
+         * =========================================================================
+         * MÓDULO 3: CLASE DE ENTIDAD LIRIO (CRECIMIENTO ORGÁNICO Y RENDERIZADO)
+         * =========================================================================
+         */
+        class MagicLily {
+            constructor(id, x, y, species, scale = 1.0) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.species = species;
+                this.scale = scale;
+
+                // Estados de cultivo:
+                // 'slot' (esperando semilla) -> 'seed' (semilla plantada, necesita agua)
+                // -> 'sprout' (tallo crecido con capullo, necesita polvo estelar)
+                // -> 'bloomed' (florecido completamente)
+                this.stage = 'slot';
+
+                // Progresos continuos (0.0 a 1.0)
+                this.seedPulse = Math.random() * Math.PI * 2;
+                this.stemGrowth = 0;      // 0 -> 1 al regar con Rocío Lunar
+                this.bloomProgress = 0;   // 0 -> 1 al espolvorear Polvo Estelar
+                this.swayPhase = Math.random() * Math.PI * 2;
+                this.swaySpeed = 0.015 + Math.random() * 0.008;
+
+                // Geometría orgánica única por lirio
+                this.maxHeight = (135 + (id % 3) * 22 + Math.random() * 18) * scale;
+                this.curveOffset = ((id % 2 === 0 ? 1 : -1) * (16 + Math.random() * 14)) * scale;
+                this.headTilt = (id % 2 === 0 ? 0.16 : -0.16);
+                this.shadowDrain = 0; // Si una sombra nocturna lo toca, reduce brillo temporalmente
+            }
+
+            getHeadPosition(time) {
+                const sway = Math.sin(this.swayPhase + time * 0.0015) * 6 * this.stemGrowth;
+                const currentH = this.maxHeight * this.stemGrowth;
+                const headX = this.x + this.curveOffset * this.stemGrowth + sway;
+                const headY = this.y - currentH;
+                return { x: headX, y: headY, sway };
+            }
+
+            update(dt) {
+                this.seedPulse += 0.05;
+                this.swayPhase += this.swaySpeed;
+                if (this.shadowDrain > 0) {
+                    this.shadowDrain = Math.max(0, this.shadowDrain - 0.004);
+                }
+            }
+
+            draw(ctx, time) {
+                // 1. Si es un espacio fértil vacío ('slot'), dibujar runa lunar en la tierra
+                if (this.stage === 'slot') {
+                    const pulse = 0.5 + 0.5 * Math.sin(this.seedPulse);
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    // Aura en el suelo
+                    const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 26);
+                    grad.addColorStop(0, `rgba(254, 240, 138, ${0.25 + pulse * 0.25})`);
+                    grad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 26, 11, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Anillo punteado de plantación
+                    ctx.strokeStyle = `rgba(251, 191, 36, ${0.45 + pulse * 0.45})`;
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 18 + pulse * 3, 7 + pulse * 1.5, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Destello central
+                    ctx.fillStyle = '#FEF08A';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 2.5 + pulse * 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    return;
+                }
+
+                // 2. Dibujar montículo de tierra fértil y bulbo luminoso si está en etapa 'seed'
+                ctx.save();
+                ctx.fillStyle = '#1E1035';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + 2, 18 * this.scale, 6 * this.scale, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (this.stage === 'seed' && this.stemGrowth < 0.15) {
+                    const pulse = 0.6 + 0.4 * Math.sin(this.seedPulse * 1.4);
+                    const bulbGrad = ctx.createRadialGradient(this.x, this.y - 4, 1, this.x, this.y - 4, 16);
+                    bulbGrad.addColorStop(0, '#FFFFFF');
+                    bulbGrad.addColorStop(0.4, this.species.petalOuter);
+                    bulbGrad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+                    ctx.fillStyle = bulbGrad;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y - 4, 14 * pulse, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Barra circular sutil de hidratación
+                    this.drawCircularProgress(ctx, this.x, this.y - 26, this.stemGrowth, '#38BDF8');
+                }
+                ctx.restore();
+
+                // 3. Dibujar Tallo Curvo Orgánico y Hojas Alargadas de Lirio
+                if (this.stemGrowth > 0.02) {
+                    const head = this.getHeadPosition(time);
+                    const cpX = this.x + this.curveOffset * 0.35 * this.stemGrowth + head.sway * 0.4;
+                    const cpY = this.y - (this.maxHeight * this.stemGrowth) * 0.52;
+
+                    ctx.save();
+                    // Sombra/brillo del tallo
+                    const stemGrad = ctx.createLinearGradient(this.x, this.y, head.x, head.y);
+                    stemGrad.addColorStop(0, '#065F46');
+                    stemGrad.addColorStop(0.6, '#10B981');
+                    stemGrad.addColorStop(1, '#6EE7B7');
+
+                    ctx.strokeStyle = stemGrad;
+                    ctx.lineWidth = (4.2 - this.stemGrowth * 1.1) * this.scale;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.quadraticCurveTo(cpX, cpY, head.x, head.y);
+                    ctx.stroke();
+
+                    // Hojas lanceoladas características del lirio (aparecen conforme crece el tallo)
+                    if (this.stemGrowth > 0.25) {
+                        this.drawLilyLeaf(ctx, this.x, this.y - 8, -1, Math.min(1, (this.stemGrowth - 0.2) * 1.4), head.sway);
+                    }
+                    if (this.stemGrowth > 0.45) {
+                        this.drawLilyLeaf(ctx, this.x + this.curveOffset * 0.15, this.y - this.maxHeight * 0.25 * this.stemGrowth, 1, Math.min(1, (this.stemGrowth - 0.4) * 1.5), head.sway);
+                    }
+                    if (this.stemGrowth > 0.68) {
+                        this.drawLilyLeaf(ctx, this.x + this.curveOffset * 0.35, this.y - this.maxHeight * 0.48 * this.stemGrowth, -0.85, Math.min(1, (this.stemGrowth - 0.65) * 1.8) * 0.78, head.sway);
+                    }
+
+                    // 4. Dibujar Capullo o Flor de Lirio Abierta en la punta del tallo
+                    this.drawLilyFlowerHead(ctx, head.x, head.y, time);
+
+                    // Indicador de progreso según etapa
+                    if (this.stage === 'seed' && this.stemGrowth >= 0.15 && this.stemGrowth < 1) {
+                        this.drawCircularProgress(ctx, head.x, head.y - 28, this.stemGrowth, '#38BDF8');
+                    } else if (this.stage === 'sprout' && this.bloomProgress < 1) {
+                        this.drawCircularProgress(ctx, head.x, head.y - 34, this.bloomProgress, '#FBBF24');
+                    }
+
+                    ctx.restore();
+                }
+            }
+
+            drawLilyLeaf(ctx, baseX, baseY, dir, factor, sway) {
+                ctx.save();
+                ctx.translate(baseX, baseY);
+                const len = 54 * this.scale * factor;
+                const width = 11 * this.scale * factor;
+                const tipX = dir * len + sway * 0.5;
+                const tipY = -len * 0.68;
+
+                const leafGrad = ctx.createLinearGradient(0, 0, tipX, tipY);
+                leafGrad.addColorStop(0, '#064E3B');
+                leafGrad.addColorStop(0.55, '#059669');
+                leafGrad.addColorStop(1, '#34D399');
+
+                ctx.fillStyle = leafGrad;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(dir * len * 0.45, -len * 0.65 - width, tipX, tipY);
+                ctx.quadraticCurveTo(dir * len * 0.55, -len * 0.25 + width, 0, 0);
+                ctx.fill();
+
+                // Nervadura central luminosa de la hoja
+                ctx.strokeStyle = 'rgba(167, 243, 208, 0.45)';
+                ctx.lineWidth = 0.9;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(dir * len * 0.48, -len * 0.45, tipX, tipY);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            drawLilyFlowerHead(ctx, hx, hy, time) {
+                ctx.save();
+                ctx.translate(hx, hy);
+                ctx.rotate(this.headTilt + Math.sin(this.swayPhase) * 0.05);
+
+                const open = this.bloomProgress; // 0 = capullo cerrado, 1 = lirio majestuoso abierto
+                const dimFactor = 1 - this.shadowDrain * 0.5;
+
+                // Halo mágico detrás de la flor cuando abre
+                if (open > 0.05) {
+                    const auraRadius = (28 + open * 42) * this.scale * dimFactor;
+                    const aura = ctx.createRadialGradient(0, -10, 2, 0, -10, auraRadius);
+                    aura.addColorStop(0, this.species.glowColor);
+                    aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = aura;
+                    ctx.beginPath();
+                    ctx.arc(0, -10, auraRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Dibujar los 6 tépalos/pétalos característicos de un Lilium (3 posteriores + 3 frontales)
+                const petalAnglesBack = [-0.85, 0, 0.85];
+                const petalAnglesFront = [-0.52, 0.52, Math.PI];
+
+                // Capa trasera de 3 pétalos
+                petalAnglesBack.forEach((baseAngle, idx) => {
+                    const spreadAngle = baseAngle * (0.18 + open * 0.95);
+                    const pLen = (24 + open * 24) * this.scale;
+                    const pWid = (7 + open * 8.5) * this.scale;
+                    this.drawSingleLilyPetal(ctx, spreadAngle, pLen, pWid, 0.82, idx);
+                });
+
+                // Pistilo y 6 estambres dorados con anteras brillantes en el centro (visibles al abrir)
+                if (open > 0.25) {
+                    const stamenAlpha = Math.min(1, (open - 0.25) * 1.4);
+                    ctx.save();
+                    ctx.globalAlpha = stamenAlpha;
+                    const stamenAngles = [-0.42, -0.25, -0.08, 0.08, 0.25, 0.42];
+                    stamenAngles.forEach((ang, i) => {
+                        const sLen = (20 + open * 16 + (i % 2) * 4) * this.scale;
+                        const sx = Math.sin(ang) * sLen;
+                        const sy = -Math.cos(ang) * sLen;
+
+                        ctx.strokeStyle = '#ECFDF5';
+                        ctx.lineWidth = 1.2 * this.scale;
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.quadraticCurveTo(sx * 0.4, sy * 0.6, sx, sy);
+                        ctx.stroke();
+
+                        // Antera cargada de polen dorado brillante
+                        ctx.fillStyle = this.species.stamenColor;
+                        ctx.shadowBlur = 8;
+                        ctx.shadowColor = '#FBBF24';
+                        ctx.beginPath();
+                        ctx.ellipse(sx, sy, 3.2 * this.scale, 1.6 * this.scale, ang + 0.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    ctx.restore();
+                }
+
+                // Capa frontal de 3 pétalos curvados hacia afuera
+                petalAnglesFront.forEach((baseAngle, idx) => {
+                    if (idx === 2 && open < 0.45) return; // El pétalo inferior cae hacia abajo al abrirse
+                    const spreadAngle = idx === 2
+                        ? Math.PI * (0.2 + open * 0.8)
+                        : baseAngle * (0.15 + open * 1.05);
+                    const pLen = (25 + open * 23) * this.scale;
+                    const pWid = (7.5 + open * 8.5) * this.scale;
+                    this.drawSingleLilyPetal(ctx, spreadAngle, pLen, pWid, 1.0, idx + 3);
+                });
+
+                ctx.restore();
+            }
+
+            drawSingleLilyPetal(ctx, angle, length, width, brightness, seedIdx) {
+                ctx.save();
+                ctx.rotate(angle);
+
+                const pGrad = ctx.createLinearGradient(0, 0, 0, -length);
+                pGrad.addColorStop(0, '#A7F3D0'); // Base verde-luz del cáliz
+                pGrad.addColorStop(0.28, this.species.petalOuter);
+                pGrad.addColorStop(0.78, this.species.petalInner);
+                pGrad.addColorStop(1, '#FFFFFF');
+
+                ctx.fillStyle = pGrad;
+                ctx.globalAlpha = brightness;
+
+                // Silueta elegante y puntiaguda de pétalo de lirio
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-width, -length * 0.28, -width * 0.95, -length * 0.72, 0, -length);
+                ctx.bezierCurveTo(width * 0.95, -length * 0.72, width, -length * 0.28, 0, 0);
+                ctx.fill();
+
+                // Borde sutil luminoso
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+
+                // Nervadura central y motas características del lirio
+                ctx.strokeStyle = this.species.veinColor;
+                ctx.globalAlpha = 0.35;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, -4);
+                ctx.lineTo(0, -length * 0.82);
+                ctx.stroke();
+
+                if (this.bloomProgress > 0.4) {
+                    ctx.fillStyle = this.species.veinColor;
+                    ctx.globalAlpha = 0.45 * this.bloomProgress;
+                    for (let d = 1; d <= 3; d++) {
+                        const dy = -length * (0.22 + d * 0.11);
+                        const dx = (d % 2 === 0 ? 1 : -1) * width * 0.22;
+                        ctx.beginPath();
+                        ctx.arc(dx, dy, 1.1 * this.scale, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                ctx.restore();
+            }
+
+            drawCircularProgress(ctx, cx, cy, progress, color) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, 11, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        /**
+         * =========================================================================
+         * MÓDULO 4: MOTOR PRINCIPAL DEL JARDÍN, PARTÍCULAS Y EVENTOS DINÁMICOS
+         * =========================================================================
+         */
+        const canvas = document.getElementById('garden-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let W = window.innerWidth;
+        let H = window.innerHeight;
+
+        // Estado global del juego
+        const gameState = {
+            phase: 'intro', // 'intro' | 'cultivating' | 'readyToUnite' | 'seal' | 'revealed' | 'sandbox'
+            activeTool: 'seed',
+            essence: 0,
+            bondLevel: 20,  // Sintonía entre Valy y él (20% -> 100%)
+            pairInteractionIdx: 0,
+            bloomedCount: 0,
+            isPointerDown: false,
+            pointerX: W / 2,
+            pointerY: H / 2,
+            sealTaps: 0,
+            sealPulse: 0,
+            constellationAlpha: 0
+        };
+
+        // Colecciones de entidades
+        let lilies = [];
+        let valyChar = null;
+        let boyChar = null;
+        let activeKeys = {};
+        let stars = [];
+        let shootingStars = [];
+        let fireflies = [];
+        let particles = [];
+        let lightOrbs = [];      // Gotas de luz flotantes para atrapar
+        let shadowWisps = [];    // Sombras de viento que Valy puede disipar tocándolas
+        let shockwaves = [];     // Ondas expansivas al florecer o tocar el sello
+
+        const PAIR_INTERACTIONS = [
+            {
+                boyLine: "Qué bien te ves bajo esta noche de lirios, Valy ✨",
+                valyLine: "¡Mira cómo empiezan a brillar los pétalos! 🌷",
+                emote: 'sparkle'
+            },
+            {
+                boyLine: "Cada lirio guarda una pista de lo que pasará hoy... 🤫",
+                valyLine: "¡Ya quiero descubrir cuál es el secreto! 🗝️",
+                emote: 'sparkle'
+            },
+            {
+                boyLine: "Toma este destello lunar para ti, Valy 🌷✨",
+                valyLine: "¡Es hermoso! Mira cuánta luz tiene 💖",
+                emote: 'lily'
+            },
+            {
+                boyLine: "Pase lo que pase, hoy será un día inolvidable ✨",
+                valyLine: "Sigamos adelante juntos 🌙",
+                emote: 'heart'
+            }
+        ];
+
+        function createSkyAndFireflies() {
+            stars = [];
+            const starCount = Math.min(95, Math.floor((W * H) / 9000));
+            const tints = ['#FFFBEB', '#FEF08A', '#E9D5FF', '#BAE6FD'];
+            for (let i = 0; i < starCount; i++) {
+                stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * (H * 0.68),
+                    r: 0.7 + Math.random() * 1.9,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.015 + Math.random() * 0.03,
+                    tint: tints[i % tints.length]
+                });
+            }
+
+            fireflies = [];
+            const ffCount = Math.min(28, Math.floor(W / 28));
+            for (let i = 0; i < ffCount; i++) {
+                fireflies.push({
+                    x: Math.random() * W,
+                    y: H * 0.30 + Math.random() * (H * 0.58),
+                    vx: (Math.random() - 0.5) * 0.45,
+                    vy: -0.15 - Math.random() * 0.25,
+                    r: 1.5 + Math.random() * 2.2,
+                    phase: Math.random() * Math.PI * 2,
+                    isPink: Math.random() > 0.55
+                });
+            }
+        }
+
+        function initCoreGarden() {
+            lilies = [];
+            const groundYBase = H * 0.75;
+            const marginX = Math.max(42, W * 0.10);
+            const usableW = W - marginX * 2;
+
+            // Distribuir los 7 lirios en un arco orgánico detrás de los personajes
+            for (let i = 0; i < 7; i++) {
+                const ratio = i / 6;
+                const x = marginX + usableW * ratio;
+                const arcOffset = Math.sin(ratio * Math.PI) * (H * 0.045);
+                const y = groundYBase - arcOffset + (i % 2 === 0 ? 6 : -5);
+                const scale = W < 500 ? 0.80 : 0.98;
+                lilies.push(new MagicLily(i, x, y, LILY_SPECIES[i], scale));
+            }
+
+            // Crear personajes jugables/interactivos en primer plano
+            const startY = H * 0.85;
+            valyChar = new GardenCharacter('valy', 'Valy ✨', W * 0.55, startY);
+            boyChar = new GardenCharacter('boy', 'Tú 💫', W * 0.44, startY + 4);
+        }
+
+        function repositionCoreLilies() {
+            if (lilies.length < 7) return;
+            const groundYBase = H * 0.75;
+            const marginX = Math.max(42, W * 0.10);
+            const usableW = W - marginX * 2;
+            for (let i = 0; i < 7; i++) {
+                const ratio = i / 6;
+                lilies[i].x = marginX + usableW * ratio;
+                const arcOffset = Math.sin(ratio * Math.PI) * (H * 0.045);
+                lilies[i].y = groundYBase - arcOffset + (i % 2 === 0 ? 6 : -5);
+                lilies[i].scale = W < 500 ? 0.80 : 0.98;
+            }
+            if (valyChar && boyChar) {
+                valyChar.x = Math.min(W - 36, Math.max(36, valyChar.x));
+                valyChar.y = Math.min(H * 0.91, Math.max(H * 0.77, valyChar.y));
+                boyChar.x = Math.min(W - 36, Math.max(36, boyChar.x));
+                boyChar.y = Math.min(H * 0.91, Math.max(H * 0.77, boyChar.y));
+            }
+        }
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width = Math.floor(W * dpr);
+            canvas.height = Math.floor(H * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            createSkyAndFireflies();
+            repositionCoreLilies();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        initCoreGarden();
+
+        /**
+         * =========================================================================
+         * MÓDULO 5: EMISORES DE PARTÍCULAS, GOTAS DE LUZ Y SOMBRAS DE VIENTO
+         * =========================================================================
+         */
+        function spawnParticles(x, y, count, type) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 0.6 + Math.random() * 3.2;
+                let color = '#FEF08A';
+                let gravity = 0.02;
+                let size = 2 + Math.random() * 3;
+                let isPetal = false;
+
+                if (type === 'water') {
+                    color = Math.random() > 0.4 ? '#38BDF8' : '#BAE6FD';
+                    gravity = 0.14;
+                    size = 2 + Math.random() * 2.2;
+                } else if (type === 'stardust') {
+                    const palette = ['#FEF08A', '#FBBF24', '#F472B6', '#C084FC'];
+                    color = palette[Math.floor(Math.random() * palette.length)];
+                    gravity = -0.015;
+                } else if (type === 'bloom') {
+                    const palette = ['#FEF08A', '#F472B6', '#C084FC', '#38BDF8', '#FFFFFF'];
+                    color = palette[Math.floor(Math.random() * palette.length)];
+                    gravity = 0.01;
+                    size = 3 + Math.random() * 3.5;
+                } else if (type === 'petal') {
+                    const palette = ['#F472B6', '#FEF08A', '#C084FC', '#7DD3FC', '#FB7185'];
+                    color = palette[Math.floor(Math.random() * palette.length)];
+                    gravity = 0.035;
+                    size = 5 + Math.random() * 5;
+                    isPetal = true;
+                }
+
+                particles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - (type === 'water' ? 0.5 : 1.0),
+                    gravity,
+                    alpha: 1,
+                    decay: 0.014 + Math.random() * 0.015,
+                    color,
+                    size,
+                    isPetal,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.12
+                });
+            }
+        }
+
+        function spawnShockwave(x, y, color = '#FEF08A', maxRadius = 110) {
+            shockwaves.push({
+                x,
+                y,
+                radius: 8,
+                maxRadius,
+                alpha: 0.9,
+                color
+            });
+        }
+
+        function showPoeticToast(x, y, text) {
+            const toast = document.createElement('div');
+            toast.className = 'poetic-toast';
+            toast.textContent = text;
+            const safeX = Math.min(Math.max(x, 140), W - 140);
+            const safeY = Math.min(Math.max(y - 30, 95), H - 140);
+            toast.style.left = `${safeX}px`;
+            toast.style.top = `${safeY}px`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        function addEssence(amount) {
+            gameState.essence += amount;
+            document.getElementById('essence-count').textContent = `${gameState.essence} ✨`;
+        }
+
+        function addBond(amount) {
+            gameState.bondLevel = Math.min(100, gameState.bondLevel + amount);
+            document.getElementById('bond-bar-fill').style.width = `${gameState.bondLevel}%`;
+        }
+
+        function updateHandButtonUI() {
+            const btn = document.getElementById('btn-pair-hand');
+            const text = document.getElementById('hand-btn-text');
+            if (!btn || !text || !valyChar) return;
+            if (valyChar.holdingHands) {
+                btn.classList.add('active-state');
+                text.textContent = 'De la mano ✨';
+            } else {
+                btn.classList.remove('active-state');
+                text.textContent = 'Tomar su mano';
+            }
+        }
+
+        function triggerPairTalk() {
+            if (!valyChar || !boyChar || gameState.phase === 'intro') return;
+            sound.init();
+
+            const moment = PAIR_INTERACTIONS[gameState.pairInteractionIdx % PAIR_INTERACTIONS.length];
+            gameState.pairInteractionIdx++;
+
+            boyChar.say(moment.boyLine, 260);
+            setTimeout(() => {
+                if (valyChar) valyChar.say(moment.valyLine, 250);
+            }, 650);
+
+            valyChar.triggerEmote(moment.emote, 140);
+            boyChar.triggerEmote('sparkle', 140);
+
+            const midX = (valyChar.x + boyChar.x) / 2;
+            const midY = (valyChar.y + boyChar.y) / 2 - 42;
+            sound.playCollectLight();
+            addEssence(10);
+            addBond(10);
+            spawnParticles(midX, midY, 18, 'bloom');
+            spawnShockwave(midX, midY, '#F472B6', 85);
+        }
+
+        function triggerPairHoldHands() {
+            if (!valyChar || !boyChar || gameState.phase === 'intro') return;
+            sound.init();
+
+            valyChar.holdingHands = !valyChar.holdingHands;
+            boyChar.holdingHands = valyChar.holdingHands;
+            updateHandButtonUI();
+
+            if (valyChar.holdingHands) {
+                valyChar.targetX = boyChar.x + 42;
+                valyChar.targetY = boyChar.y;
+                boyChar.say("Caminemos juntos por el jardín, Valy 🤝✨", 230);
+                valyChar.triggerEmote('heart', 140);
+                boyChar.triggerEmote('heart', 140);
+                sound.playCollectLight();
+                addEssence(15);
+                addBond(14);
+                const midX = (valyChar.x + boyChar.x) / 2;
+                const midY = (valyChar.y + boyChar.y) / 2 - 32;
+                spawnParticles(midX, midY, 22, 'bloom');
+                spawnShockwave(midX, midY, '#FEF08A', 95);
+            } else {
+                valyChar.say("¡Sigamos cuidando los lirios! 🌷", 180);
+            }
+        }
+
+        function triggerPairGiftSparkle() {
+            if (!valyChar || !boyChar || gameState.phase === 'intro') return;
+            sound.init();
+
+            boyChar.say("Un pétalo estelar solo para ti, Valy 🌸✨", 230);
+            setTimeout(() => {
+                if (valyChar) valyChar.say("¡Me encanta! Gracias por este detalle 💖", 230);
+            }, 550);
+
+            valyChar.celebrateTimer = 32;
+            valyChar.triggerEmote('lily', 150);
+            boyChar.triggerEmote('sparkle', 130);
+
+            sound.playLilyBloom(4);
+            addEssence(20);
+            addBond(15);
+            spawnParticles(valyChar.x, valyChar.y - 48, 26, 'petal');
+            spawnParticles(valyChar.x, valyChar.y - 48, 22, 'bloom');
+            spawnShockwave(valyChar.x, valyChar.y - 42, '#F472B6', 105);
+        }
+
+        function triggerPairInteraction() {
+            triggerPairTalk();
+        }
+
+        // Spawner periódico de eventos dinámicos (Gotas de Luz, Sombras de Viento, Estrellas Fugaces)
+        setInterval(() => {
+// ... existing code ... -->
+        function handleInteractionPoint(x, y, isTap = false) {
+            if (gameState.phase === 'intro') return;
+
+            // 0. Si toca directamente a ÉL o a Valy en el prado, activar interacción tierna entre ambos
+            if (isTap && valyChar && boyChar) {
+                const distBoy = Math.hypot(x - boyChar.x, y - (boyChar.y - 35));
+                const distValy = Math.hypot(x - valyChar.x, y - (valyChar.y - 35));
+                if (distBoy < 38 || distValy < 36) {
+                    triggerPairInteraction();
+                    return;
+                }
+            }
+
+            // 1. Verificar si tocó una Gota de Luz flotante
+            for (let i = lightOrbs.length - 1; i >= 0; i--) {
+// ... existing code ... -->
